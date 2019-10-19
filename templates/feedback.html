@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+    <body id="coinmart" style="background: #c8c8c8;background-image: url(../static/images/2.png); background-size: cover;width:1450px; height:300px">
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+      <h2>Feedback</h2>
+      {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+        <div class="Content-Main">
+                <div id="Content-Main1">
+                    <form  action="{{ url_for('feedbacks_fun') }}" method=post class="form-report">
+                        <label>
+                        <span>Contact:</span>
+                        <select name="Contact" class="select2" id="Contact">
+                            <option value="Email">Email</option>
+                            <option value="Phone">Phone</option>
+                        </select>
+                        </label>
+                        <label>
+                            <span>Message:</span>
+                            <textarea id="mesaage" name="mesaage" ></textarea>
+                        </label>
+                        <label>
+                            <span>Subject:</span>
+                            <select name="Subject" class="select2" id="Subject">
+                                <option value="comment">Comment</option>
+                                <option value="General Question">General Question</option>
+                            </select>
+                        </label>
+                    <label>
+                        <input type="submit"  class="button" value="Send">
+                    </label>
+
+                    </form><!-- form -->
+                </div>
+        </div>
+    </body>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+<html>
+<head>
+<title>Registration</title>
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/validateForm.js') }}">
+</script>
+</head>
+<body id="coinmart" style="background: #c8c8c8;background-image: url(../static/images/2.png); background-size: cover;width:1450px; height:300px">
+<form action="/updateProfile" method="POST" onsubmit="return validate()">
+		<p>First Name:{{profileData[6]}}</p>
+		<p>Last Name:{{profileData[7]}}</p>
+        <p>Gender:{{profileData[3]}}</p>
+        <p>Email:<input type="text" name="email" value={{profileData[2]}}></p>
+        <p>Age <input type="number" name="age" value={{profileData[5]}}></p>
+        <p>Weight: <input type="number" name="weight" value={{profileData[4]}}></p>
+		<p>Address: <input type="text" name="address1" value={{profileData[8]}}></p>
+		<p>postcode Code: <input type="text" name="postcode" value={{profileData[9]}}></p>
+		<p>City: <input type="text" name="city" value={{profileData[10]}}></p>
+		<p>Phone Number: <input type="text" name="phone" value={{profileData[11]}}></p>
+		<input type="submit" value="Save">
+</form>
+</body>
+</html>
+{% endblock %}
+
+
+
+
+

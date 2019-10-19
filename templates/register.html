@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+    <body id="coinmart" style="background: #c8c8c8;background-image: url(../static/images/2.png); background-size: cover;width:1450px; height:300px">
+
+          <h2>Register new user</h2>
+        {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+        <div class="container">
+            <div class="row">
+            <section id="content"  >
+                <form action="{{ url_for('register') }}" method=post class="col-xs-12 col-md-offset-6">
+                    <input type="text" name="username" placeholder="Enter a Username" required="" id="username" />
+                    <input id=password type=password name=password placeholder="Enter a Password" />
+                                <input id=cfm_password type=password name=cfm_password placeholder="Confirm your Password" />
+
+                    <input id=btn_register type=submit value=Register name=btn_register />
+
+                </form>
+            </section>
+            </div>
+        </div>
+    </body>
+{% endblock %}

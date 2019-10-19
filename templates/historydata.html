@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block body %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Tshirt History Window</title>
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/dist/echarts.js"></script>
+</head>
+<body style="background: #c8c8c8; ">
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<div style="">
+    <h2 style="text-align: center;">E-Tshirt History Window</h2>
+</div>
+
+<div style="width: 1000px;height:600px; margin: auto;padding-top: 30px;">
+    <div id="img_1" style="width: 500px;height:300px;float: left;"></div>
+    <div id="img_2" style="width: 500px;height:300px;float: left;"></div>
+    <div id="img_3" style="width: 500px;height:300px;float: left;"></div>
+</div>
+<script>
+    var maxId1 = 0;
+    var maxId2 = 0;
+    var maxId3 = 0;
+    var data1 = [];
+    var date1 = [];
+    var data2 = [];
+    var date2 = [];
+    var data3 = [];
+    var date3 = [];
+    var myChart1 = echarts.init(document.getElementById('img_1'));
+    var myChart2 = echarts.init(document.getElementById('img_2'));
+    var myChart3 = echarts.init(document.getElementById('img_3'));
+    $.getJSON("/get_history_spo/", function (data) {
+                data1 = data1.concat(data.data);
+                date1 = date1.concat(data.date);
+                myChart1.setOption({
+        title: {
+            text: 'Spo2 history window'
+        },
+        tooltip: {},
+        legend: {
+            right: 0,
+            data: ['SPO2']
+        },
+        xAxis: {
+            data: date1,
+            axisLabel: {
+                rotate: 60
+            }
+        },
+        yAxis: {},
+        series: [{
+            name: 'SPO2',
+            type: 'line',
+            data: data1
+        }]
+    });
+    });
+    $.getJSON("/get_history_bpm/", function (data) {
+                data2 = data2.concat(data.data);
+                date2 = date2.concat(data.date);
+                myChart2.setOption({
+        title: {
+            text: 'Heart rate history window'
+        },
+        tooltip: {},
+        legend: {
+            right: 0,
+            data: ['heart rate']
+        },
+        xAxis: {
+            data: date2,
+            axisLabel: {
+                rotate: 60
+            }
+        },
+        yAxis: {},
+        series: [{
+            name: 'heart rate',
+            type: 'line',
+            data: data2
+        }]
+    });
+    });
+    $.getJSON("/get_history_temp/", function (data) {
+                data3 = data3.concat(data.data);
+                date3 = date3.concat(data.date);
+                myChart3.setOption({
+        title: {
+            text: 'Temperature history window'
+        },
+        tooltip: {},
+        legend: {
+            right: 0,
+            data: ['Temperature']
+        },
+        xAxis: {
+            data: date3,
+            axisLabel: {
+                rotate: 60
+            }
+        },
+        yAxis: {},
+        series: [{
+            name: 'Temperature',
+            type: 'line',
+            data: data3
+        }]
+    });
+    });
+
+    </script>
+ </body>
+</html>
+{% endblock %}

@@ -1,0 +1,85 @@
+<!doctype html>
+<title>T-shirt</title>
+<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="viewport" content="width=device-width" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="../static/javascript.js"></script>
+    <link rel="stylesheet" type=text/css href="../static/style.css">
+    <link rel="stylesheet" type=text/css href="../static/style.css?version=45">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="image/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="image/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="image/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:700,400' rel='stylesheet' />
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="" />
+
+</head>
+
+<div class="container-fluid">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!--<a class="navbar-brand" href="/watchlists">CoinMart</a>-->
+{#            <a class="navbar-brand" href= "{{ url_for('show_watchlists') }}">closet</a>#}
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav navbar-left">
+                <li style="width: 80px;height:30px;color:#CFD5D9; font-size: 20px";>T-shirt </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              {% if not session.logged_in %}
+                <li role="presentation"><a href=" {{url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span>log in</a></li>
+                  <li><a href="{{ url_for('register') }}"><span class="glyphicon glyphicon-user"></span>Sign Up</a></li>
+              {% else %}
+                  <li ><a id='information'  action="{{ url_for('editinfo') }}" method=GET  href="{{ url_for('editinfo') }}"  >Personal detail</a></li>
+                  <li ><a id='history'  action="{{ url_for('history_window') }}" method=GET  href="{{ url_for('history_window') }}"  >Personal data history</a></li>
+                  <li ><a id='realtime'  action="{{ url_for('realtime_chart') }}" method=GET  href="{{ url_for('realtime_chart') }}"  >Real-time monitoring window</a></li>
+                  <li ><a id='feedback'  action="{{ url_for('feedbacks_fun') }}" method=GET  href="{{ url_for('feedbacks_fun') }}"  >Feedbacks</a></li>
+                  <li role="presentation" name=logout_link><a href="{{ url_for('logout') }}">log out</a ></li>
+              {% endif %}
+          </ul>
+
+
+        </div>
+      </div>
+    </nav>
+</div>
+
+
+
+ <div class=page>
+{#  {% for message in get_flashed_messages() %}#}
+{#    <div class=flash>{{ message }}</div>#}
+{#  {% endfor %}#}
+  {% block body %}{% endblock %}
+</div>
+
+

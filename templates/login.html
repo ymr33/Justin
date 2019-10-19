@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}
+    <body id="coinmart" style="background: #c8c8c8;background-image: url(../static/images/2.png); background-size: cover;width:1450px; height:300px">
+      <h2>Login</h2>
+      {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+        <div class="container">
+
+            <div class="row">
+
+                <div id="content">
+                    <form  action="{{ url_for('login') }}" method=post class="col-xs-12 col-md-offset-6">
+                            <input type="text" name="username" placeholder="Enter a Username" required="" id="username" />
+                            <input type="password" name="password" placeholder="Enter a Password" required="" id="password" />
+                            <input id=btn_login align ="center" type=submit name="btn_login" value=Login />
+                    </form><!-- form -->
+
+                </div><!-- content -->
+
+            </div>
+
+        </div><!-- container -->
+    </body>
+{% endblock %}
+
+
