@@ -28,7 +28,7 @@ conn.execute('''create table user_inf(
 
 
 conn.execute('''insert into users (username,password) values('stn131415','Stn131415~');''')
-conn.execute('''insert into user_inf(username,email,gender,weight,age,firstName,lastName,address1,postcode,city,phone) values('stn131415','576664285@qq.com','male','63','25','leo','sun','aa','1111','sydney','047264467');''')
+conn.execute('''insert into user_inf(username,email,gender,weight,age,firstName,lastName,address1,postcode,city,phone) values('stn131415','576664285@qq.com','male','63','25','leo','sun','aa','1111','sydney','+61416649488');''')
 conn.commit()
 conn.close()
 

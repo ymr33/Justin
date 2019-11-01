@@ -7,6 +7,10 @@ import re
 import time
 import threading
 from flask_mail import Mail, Message
+from twilio.rest import Client
+
+
+
 os.environ['FLASK_APP'] = 'tshirt'
 ssl._create_default_https_context = ssl._create_unverified_context
 app = Flask(__name__)
@@ -21,6 +25,11 @@ app.config.update(
 )
 
 mail = Mail(app)
+
+# Your Account Sid and Auth Token from twilio.com/console
+account_sid = 'ACa3652f6c1d8da8c016668259fc62c02d'
+auth_token = '1c3de196d4f2715024aef1a1bb119d6f'
+client = Client(account_sid, auth_token)
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path,'user.db'),
@@ -65,10 +74,28 @@ def get_inf(user):
     rows = cur.fetchone()
     return rows
 
+def emergency(type,data):
+    auth_user = session.get("username")
+    inf = get_inf(auth_user)
+    # body = 'Emergency status of '+ type +' ('+str(data)+')is dangerous! please play attention'
+    # msg = Message('Emergency, '+auth_user, sender='stn131415@gmail.com', recipients=[inf['email']])
+    # msg.body = body
+    # mail.send(msg)
+    print(inf['phone'])
+    # message = client.messages \
+    #     .create(
+    #     body=body,
+    #     from_='+12054154324',
+    #     to=inf['phone']
+    # )
+    return 'successful'
 
+def add(a,b):
+    return a+b
 
 @app.route('/')
 def index():
+
     return render_template('home.html')
 
 @app.route('/realtime')
@@ -81,10 +108,11 @@ def realtime_chart():
 def get_spo():
     start_id = request.args.get('maxId', 0)
     start_date = request.args.get('Date[]',0)
-    # 创建数据库对象
     baseurl = "https://api.thingspeak.com/channels/858372/fields/1.json?results=1"
     data_list = []
     date_list = []
+    status=0
+    meg=[]
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
@@ -100,9 +128,22 @@ def get_spo():
             date_list.append(time_last_result)
             data_list.append(last_result)
             max_id = int(start_id) + 1
+            if float(last_result) < 90:
+                emergency('SPO2', float(last_result))
+                status=1
+                meg = 'The SPO2 is ' + last_result + '. It is a extremely hypoxic status! Please, pay attention'
+            elif float(last_result) >= 90 and float(last_result) <= 94:
+               print("注意休息")
+               meg = 'The SPO2 is ' + last_result + '. It is a hypoxic status! Keep resting'
+            elif float(last_result) > 94 and float(last_result) < 98:
+               print("运动热身")
+               meg = 'The SPO2 is ' + last_result + '. It is a Exercise status! Keep going'
+            else:
+                print('正常')
+                meg = 'The SPO2 is  ' + last_result + '. It is in a nomal value'
         else:
             max_id=int(start_id)
-        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id}, ensure_ascii=False)
+        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id,'meg':meg,'status':status}, ensure_ascii=False)
     # print(json_str)
     return json_str
 
@@ -113,6 +154,8 @@ def get_temp():
     baseurl = "https://api.thingspeak.com/channels/858372/fields/3.json?results=1"
     data_list = []
     date_list = []
+    meg=[]
+    status = 0
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
@@ -127,18 +170,30 @@ def get_temp():
             date_list.append(time_last_result)
             data_list.append(last_result)
             max_id = int(start_id) + 1
+            if float(last_result) > 38.5 or float(last_result) < 36.5:
+                status = 1
+                emergency('temperature', float(last_result))
+                meg = 'The temperature is ' + last_result + '. It is not a nomal body temperature! Please, pay attention'
+            elif (float(last_result) >= 36.5 and float(last_result) <= 36.8) or (
+                    float(last_result) >= 38 and float(last_result) <= 38.5):
+                meg = 'The temperature is  ' + last_result + '. Exercise status'
+            else:
+                print("正常")
+                meg = 'The temperature is  ' + last_result + '. It is nomal temperature'
         else:
             max_id = int(start_id)
-        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id}, ensure_ascii=False)
+        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id,'meg':meg,'status':status}, ensure_ascii=False)
     return json_str
 
 @app.route('/get_bpm/')
 def get_bpm():
     start_id = request.args.get('maxId', 0)
-    start_date = request.args.get('Date[]', 0)
-    baseurl = "https://api.thingspeak.com/channels/858372/fields/2.json?results=1"
     data_list = []
     date_list = []
+    meg=[]
+    status = 0
+    start_date = request.args.get('Date[]', 0)
+    baseurl = "https://api.thingspeak.com/channels/858372/fields/2.json?results=1"
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
@@ -153,9 +208,25 @@ def get_bpm():
             date_list.append(time_last_result)
             data_list.append(last_result)
             max_id = int(start_id) + 1
+            if float(last_result) > 180 or float(last_result) <= 60:
+                emergency('BPM', float(last_result))
+                status = 1
+                meg='The BPM is '+last_result+'. It is not a nomal body status! Please, pay attention'
+            elif float(last_result) >= 90 and float(last_result) <= 120:
+                print('热身')
+                meg = 'The BPM is decreasing ' + last_result + '. It is Warming up. Keep going!'
+            elif float(last_result) > 120 and float(last_result) <= 150:
+                print('保持高效')
+                meg = 'The BPM is  ' + last_result + '. The body is in a High-intensity training! Keep going!'
+            elif float(last_result) > 150 and float(last_result) <= 180:
+                print('注意 有点快')
+                meg = 'The BPM is  ' + last_result + '. The value is high and keep resting '
+            else:
+                print('正常')
+                meg = 'The BPM is  ' + last_result + '. It is nomal status'
         else:
             max_id = int(start_id)
-        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id}, ensure_ascii=False)
+        json_str = json.dumps({'data': data_list, 'date': date_list, 'maxId': max_id, 'meg':meg,'status':status}, ensure_ascii=False)
     # print(json_str)
     return json_str
 
@@ -183,9 +254,11 @@ def login():
                 cur2 = db.execute("select username  from users")
                 rows2 = cur2.fetchone()
                 if rows2:
+                    flash('Incorrect username or password')
                     error = 'Incorrect username or password'
                 else:
                     error ='User not registered'
+                    flash('User not registered')
 
     return render_template('login.html', error=error)
 
@@ -206,7 +279,6 @@ def register():
     if request.method == 'POST':
         user = request.form['username']
         passw = request.form['password']
-
         cfm_passw = request.form['cfm_password']
         if user in registeredmembers:
             error = 'User already registered'
@@ -223,6 +295,7 @@ def register():
             get_db().commit()
             error='You were successfully registered'
             return render_template('login.html',error=error)
+        flash(error)
     return render_template('register.html', error=error)
 
 @app.route('/adduserdetail', methods=['GET', 'POST'])
@@ -282,12 +355,16 @@ def history_window():
 
 @app.route('/get_history_spo/')
 def get_history_spo():
-    baseurl = "https://api.thingspeak.com/channels/858372/fields/1.json?results=20"
+    baseurl = "https://api.thingspeak.com/channels/858372/fields/1.json?results=30"
     data_list = []
     date_list = []
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
+    dangerou_count=0;
+    Nomal_count=0;
+    hp_count=0;
+    lp_count=0;
     for i in data["feeds"]:
         time_last_result = i['created_at']
         last_result = i['field1']
@@ -297,18 +374,30 @@ def get_history_spo():
         time_last_result = time.strftime("%H:%M:%S", timeArray)
         date_list.append(time_last_result)
         data_list.append(last_result)
-        json_str = json.dumps({'data': data_list, 'date': date_list}, ensure_ascii=False)
+        if float(last_result) < 90:
+            dangerou_count = dangerou_count + 1
+        elif float(last_result) >= 90 and float(last_result) <= 94:
+            lp_count+=1
+        elif float(last_result) > 94 and float(last_result) < 98:
+            hp_count += 1
+        else:
+            Nomal_count+=1
+        json_str = json.dumps({'data': data_list, 'date': date_list,'dangous':str(dangerou_count),'lp':str(lp_count),'hp':str(hp_count),'nomal':str(Nomal_count)}, ensure_ascii=False)
     return json_str
 
 
 @app.route('/get_history_bpm/')
 def get_history_bpm():
-    baseurl = "https://api.thingspeak.com/channels/858372/fields/2.json?results=20"
+    baseurl = "https://api.thingspeak.com/channels/858372/fields/2.json?results=30"
     data_list = []
     date_list = []
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
+    dangerou_count = 0;
+    Nomal_count = 0;
+    hp_count = 0;
+    lp_count = 0;
     for i in data["feeds"]:
         time_last_result = i['created_at']
         last_result = i['field2']
@@ -318,17 +407,31 @@ def get_history_bpm():
         time_last_result = time.strftime("%H:%M:%S", timeArray)
         date_list.append(time_last_result)
         data_list.append(last_result)
-        json_str = json.dumps({'data': data_list, 'date': date_list}, ensure_ascii=False)
+        if float(last_result) > 180 or float(last_result) <= 60:
+            dangerou_count = dangerou_count + 1
+        elif float(last_result) >= 90 and float(last_result) <= 120:
+            lp_count += 1
+        elif float(last_result) > 120 and float(last_result) <= 150:
+            hp_count += 1
+        elif float(last_result) > 150 and float(last_result) <= 180:
+            lp_count += 1
+        else:
+            Nomal_count += 1
+        json_str = json.dumps({'data': data_list, 'date': date_list,'dangous':str(dangerou_count),'lp':str(lp_count),'hp':str(hp_count),'nomal':str(Nomal_count)}, ensure_ascii=False)
     return json_str
 
 @app.route('/get_history_temp/')
 def get_history_temp():
-    baseurl = "https://api.thingspeak.com/channels/858372/fields/3.json?results=20"
+    baseurl = "https://api.thingspeak.com/channels/858372/fields/3.json?results=30"
     data_list = []
     date_list = []
     result = urllib.request.urlopen(baseurl)
     result = result.read().decode('utf-8')
     data = json.loads(result)
+    dangerou_count = 0;
+    Nomal_count = 0;
+    hp_count = 0;
+    lp_count = 0;
     for i in data["feeds"]:
         time_last_result = i['created_at']
         last_result = i['field3']
@@ -338,7 +441,33 @@ def get_history_temp():
         time_last_result = time.strftime("%H:%M:%S", timeArray)
         date_list.append(time_last_result)
         data_list.append(last_result)
-        json_str = json.dumps({'data': data_list, 'date': date_list}, ensure_ascii=False)
+        if float(last_result) > 38.5 or float(last_result) < 36.5:
+            dangerou_count = dangerou_count + 1
+        elif (float(last_result) >= 36.5 and float(last_result) <= 36.8) or (
+                float(last_result) >= 38 and float(last_result) <= 38.5):
+            hp_count += 1
+        else:
+            Nomal_count += 1
+        json_str = json.dumps({'data': data_list, 'date': date_list,'dangous':str(dangerou_count),'lp':str(lp_count),'hp':str(hp_count),'nomal':str(Nomal_count)}, ensure_ascii=False)
+    return json_str
+
+@app.route('/get_history_zanalysis/')
+def get_history_zanalysis():
+    arges = request.args.items('dangerous')
+    dangerous=[]
+    lp=[]
+    hp=[]
+    nomal=[]
+    for k, v in arges:
+        if k=='dangerous[]':
+            dangerous.append(v)
+        elif k=='nomal[]':
+            nomal.append(v)
+        elif k=='lp[]':
+            lp.append(v)
+        else:
+            hp.append(v)
+    json_str = json.dumps({'type': [['type', 'spo2', 'bpm', 'temp'],hp,nomal,dangerous,lp]}, ensure_ascii=False)
     return json_str
 
 @app.route('/feedbacks', methods=['GET', 'POST'])

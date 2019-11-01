@@ -14,11 +14,17 @@
     <h2 style="text-align: center;">E-Tshirt History Window</h2>
 </div>
 
-<div style="width: 1000px;height:600px; margin: auto;padding-top: 30px;">
+<div style="width: 1200px;height:650px; margin: auto;padding-top: 30px;">
     <div id="img_1" style="width: 500px;height:300px;float: left;"></div>
     <div id="img_2" style="width: 500px;height:300px;float: left;"></div>
     <div id="img_3" style="width: 500px;height:300px;float: left;"></div>
+    <div id="img_4" style="width: 700px;height:350px;float: left;"></div>
 </div>
+{#<div style="width: 600px;height:650px; margin: auto;padding-top: 30px;">#}
+{#       {% for message in get_flashed_messages() %}#}
+{#    <div class=flash>{{ message }}</div>#}
+{#  {% endfor %}#}
+{#</div>#}
 <script>
     var maxId1 = 0;
     var maxId2 = 0;
@@ -29,12 +35,22 @@
     var date2 = [];
     var data3 = [];
     var date3 = [];
+    var data4_d = ['Dangerous'];
+    var data4_n = ['Nomal'];
+    var data4_hp = ['High performance'];
+    var data4_lp= ['Low performance'];
     var myChart1 = echarts.init(document.getElementById('img_1'));
     var myChart2 = echarts.init(document.getElementById('img_2'));
     var myChart3 = echarts.init(document.getElementById('img_3'));
+    var myChart5 = echarts.init(document.getElementById('img_4'));
+
     $.getJSON("/get_history_spo/", function (data) {
                 data1 = data1.concat(data.data);
                 date1 = date1.concat(data.date);
+                data4_d=data4_d.concat(data.dangous);
+                data4_hp=data4_hp.concat(data.hp);
+                data4_lp=data4_lp.concat(data.lp);
+                data4_n=data4_n.concat(data.nomal);
                 myChart1.setOption({
         title: {
             text: 'Spo2 history window'
@@ -54,14 +70,30 @@
         series: [{
             name: 'SPO2',
             type: 'line',
-            data: data1
+            data: data1,
+            markPoint: {
+                data: [
+                    {type: 'max', name: 'Max'},
+                    {type: 'min', name: 'Min'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: 'average'}
+                ]
+            }
         }]
     });
     });
+
     $.getJSON("/get_history_bpm/", function (data) {
-                data2 = data2.concat(data.data);
-                date2 = date2.concat(data.date);
-                myChart2.setOption({
+        data2 = data2.concat(data.data);
+        date2 = date2.concat(data.date);
+        data4_d=data4_d.concat(data.dangous);
+        data4_hp=data4_hp.concat(data.hp);
+        data4_lp=data4_lp.concat(data.lp);
+        data4_n=data4_n.concat(data.nomal);
+        myChart2.setOption({
         title: {
             text: 'Heart rate history window'
         },
@@ -80,36 +112,97 @@
         series: [{
             name: 'heart rate',
             type: 'line',
-            data: data2
-        }]
-    });
-    });
-    $.getJSON("/get_history_temp/", function (data) {
-                data3 = data3.concat(data.data);
-                date3 = date3.concat(data.date);
-                myChart3.setOption({
-        title: {
-            text: 'Temperature history window'
-        },
-        tooltip: {},
-        legend: {
-            right: 0,
-            data: ['Temperature']
-        },
-        xAxis: {
-            data: date3,
-            axisLabel: {
-                rotate: 60
+            data: data2,
+             markPoint: {
+                data: [
+                    {type: 'max', name: 'Max'},
+                    {type: 'min', name: 'Min'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: 'average'}
+                ]
             }
-        },
-        yAxis: {},
-        series: [{
-            name: 'Temperature',
-            type: 'line',
-            data: data3
         }]
     });
-    });
+     $.getJSON("/get_history_temp/", function (data) {
+        data3 = data3.concat(data.data);
+        date3 = date3.concat(data.date);
+        data4_d=data4_d.concat(data.dangous);
+        data4_hp=data4_hp.concat(data.hp);
+        data4_lp=data4_lp.concat(data.lp);
+        data4_n=data4_n.concat(data.nomal);
+        myChart3.setOption({
+            title: {
+                text: 'Temperature history window'
+            },
+            tooltip: {},
+            legend: {
+                right: 0,
+                data: ['Temperature']
+            },
+            xAxis: {
+                data: date3,
+                axisLabel: {
+                    rotate: 60
+                }
+            },
+            yAxis: {},
+            series: [{
+                name: 'Temperature',
+                type: 'line',
+                data: data3,
+                 markPoint: {
+                data: [
+                    {type: 'max', name: 'Max'},
+                    {type: 'min', name: 'Min'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: 'average'}
+                ]
+            }
+            }]
+        });
+    $.getJSON("/get_history_zanalysis/",{dangerous: data4_d, nomal: data4_n, lp:data4_lp, hp:data4_hp},function (data) {
+        myChart5.setOption({
+            title: {
+                text: 'History analysis'
+                },
+            legend: {
+                right: 0
+            },
+            tooltip: {},
+            dataset: [{
+                source: data.type
+            }],
+            series: [{
+                type: 'pie',
+                radius: 60,
+                center: ['25%', '30%']
+            }, {
+                title:'SPO2 analysis',
+                type: 'pie',
+                radius: 60,
+                center: ['75%', '30%'],
+                encode: {
+                    itemName: 'type',
+                    value: 'spo2'
+                }
+            }, {
+                type: 'pie',
+                radius: 60,
+                center: ['25%', '75%'],
+                encode: {
+                    itemName: 'type',
+                    value: 'temp'
+                }
+            }]
+        });
+    });});
+});
 
     </script>
  </body>

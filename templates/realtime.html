@@ -15,21 +15,37 @@
     <h2 style="text-align: center;">Real-time monitoring window</h2>
 </div>
 
-<div style="width: 1000px;height:400px; margin: auto;padding-top: 30px;">
+<div style="width: 1000px;height:600px; margin: auto;padding-top: 30px;">
     <div id="img_1" style="width: 500px;height:300px;float: left;"></div>
     <div id="img_2" style="width: 500px;height:300px;float: left;"></div>
+    <div id="main1" style="width: 500px;height:300px;float: left;"></div>
+    <div id="suggest1" style="width: 500px;height:100px;float: left;"></div>
+    <div id="suggest2" style="width: 500px;height:100px;float: left;"></div>
+    <div id="suggest3" style="width: 500px;height:100px;float: left;"></div>
 </div>
+
 <script>
     var maxId1 = 0;
     var maxId2 = 0;
     var lastdate1=0;
     var lastdate2=0;
+    var lastdate3=0;
+    var mes1;
+    var mes2;
+    var mes3;
     var data1 = [];
     var date1 = [];
     var data2 = [];
     var date2 = [];
+    var data3 = [];
+    var maxId3 = 0;
+    var myChart = echarts.init(document.getElementById('main1'));
     var myChart1 = echarts.init(document.getElementById('img_1'));
     var myChart2 = echarts.init(document.getElementById('img_2'));
+    var suggest1=document.getElementById('suggest1');
+    var suggest2=document.getElementById('suggest2');
+    var suggest3=document.getElementById('suggest3');
+
     myChart1.setOption({
         title: {
             text: 'Real-time spo2 monitor'
@@ -74,20 +90,71 @@
             data: data2
         }]
     });
+    var option  = ({
+        tooltip : {
+            formatter: "{a} <br/>{b} : {c} C"
+        },
+        toolbox: {
+            feature: {
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        series: [
+            {
+                name: 'Temperature',
+                type: 'gauge',
+                min:   30,
+                max:   45,
+                data: [{value: 50, name: 'Temperature'}],
+                pointer: {				// 仪表盘指针。
+                        show: true,				// 是否显示指针,默认 true。
+                        length: "60%",			// 指针长度，可以是绝对数值，也可以是相对于半径的百分比,默认 80%。
+                        width: 4,				// 指针宽度,默认 8。
+                    },
+                detail:{
+                        show : true,
+                        backgroundColor: 'rgba(0,0,0,0)',
+                        borderWidth: 0,
+                        borderColor: '#ccc',
+                        width: 100,
+                        height: 40,
+                        offsetCenter: [0, '40%'],
+                        formatter: '{value} C' ,
+                        textStyle: {
+                            color: 'auto',
+                            fontSize : 15
+                        }
+                    },
+                title: {				// 仪表盘标题。
+                    show: true,				// 是否显示标题,默认 true。
+                    offsetCenter: [0, "-120%"],//相对于仪表盘中心的偏移位置，数组第一项是水平方向的偏移，第二项是垂直方向的偏移。可以是绝对的数值，也可以是相对于仪表盘半径的百分比。
+                    color: "#fff",			// 文字的颜色,默认 #333。
+                    fontSize: 20,			// 文字的字体大小,默认 15。
+            },
+        }
+    ]
+});
+    option.series[0].data[0].value = data3;
+    myChart.setOption(option, true);
     setInterval(function () {
         $.getJSON("/get_spo/", {maxId: maxId1, Date: lastdate1}, function (data) {
-            {#如果有新数据#}
             if (data.maxId > maxId1) {
                 maxId1 = data.maxId;
                 lastdate1=data.date;
                 data1 = data1.concat(data.data);
                 date1 = date1.concat(data.date);
+                mes1 = data.meg;
+                if(data.status==1)
+                    suggest1.style.color='red'
+                else
+                     suggest1.style.color='blue'
+                suggest1.innerHTML=mes1;
                 myChart1.setOption({
                     xAxis: {
                         data:  date1
                     },
                     series: [{
-                        // 根据名字对应到相应的系列
                         name: 'SPO2',
                         data: data1
                     }]
@@ -100,6 +167,12 @@
                 lastdate2=data.date;
                 data2 = data2.concat(data.data);
                 date2 = date2.concat(data.date);
+                mes2 = data.meg;
+                if(data.status==1)
+                    suggest2.style.color='red'
+                else
+                     suggest2.style.color='blue'
+                suggest2.innerHTML=mes2;
                 myChart2.setOption({
                     xAxis: {
                         data: date2
@@ -112,76 +185,24 @@
                 });
             }
         });
-    }, 5000);
-</script>
-</body>
- <div id="block" style="width: 150px;height:300px;float: left;"></div>
- <div id="main1" style="width: 500px;height:300px;float: left;"></div>
-    <script type="text/javascript">
-      var data3 = [];
-      var lastdate3=0;
-      var maxId3 = 0;
-      var myChart = echarts.init(document.getElementById('main1'));
-      var option = {
-
-    tooltip : {
-        formatter: "{a} <br/>{b} : {c} C"
-    },
-    toolbox: {
-        feature: {
-            restore: {},
-            saveAsImage: {}
-        }
-    },
-    series: [
-        {
-            name: 'Temperature',
-            type: 'gauge',
-            min:   30,
-            max:   45,
-
-            data: [{value: 50, name: 'Temperature'}],
-            pointer: {				// 仪表盘指针。
-	            	show: true,				// 是否显示指针,默认 true。
-	            	length: "60%",			// 指针长度，可以是绝对数值，也可以是相对于半径的百分比,默认 80%。
-	            	width: 4,				// 指针宽度,默认 8。
-	            },
-            detail:{
-                    show : true,
-                    backgroundColor: 'rgba(0,0,0,0)',
-                    borderWidth: 0,
-                    borderColor: '#ccc',
-                    width: 100,
-                    height: 40,
-                    offsetCenter: [0, '40%'],
-                    formatter: '{value} C' ,
-                    textStyle: {
-                        color: 'auto',
-                        fontSize : 15
-                    }
-                },
-            title: {				// 仪表盘标题。
-                show: true,				// 是否显示标题,默认 true。
-                offsetCenter: [0, "-120%"],//相对于仪表盘中心的偏移位置，数组第一项是水平方向的偏移，第二项是垂直方向的偏移。可以是绝对的数值，也可以是相对于仪表盘半径的百分比。
-                color: "#fff",			// 文字的颜色,默认 #333。
-                fontSize: 20,			// 文字的字体大小,默认 15。
-            },
-        }
-    ]
-};
-
-setInterval(function () {
-   $.getJSON("/get_temp/", {Date: lastdate3, maxId: maxId3}, function (data) {
+     $.getJSON("/get_temp/", {Date: lastdate3, maxId: maxId3}, function (data) {
             if (data.maxId > maxId3) {
                 maxId3 = data.maxId;
                 lastdate3=data.date
-                data3 = data3.concat(data.data);
+                data3 = data.data;
+                mes3 = data.meg;
+                if(data.status==1)
+                    suggest3.style.color='red'
+                else
+                     suggest3.style.color='blue'
+                suggest3.innerHTML=mes3
                 option.series[0].data[0].value = data3;
                 myChart.setOption(option, true);
             }
-        });
+            });
 
-},2000);
-    </script>
+   },5000);
+</script>
+</body>
 </html>
 {% endblock %}

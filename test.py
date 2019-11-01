@@ -1,5 +1,5 @@
 import unittest
-from app import app
+from app import *
 from flask import request
 import json
 
@@ -113,7 +113,7 @@ class Test_Tshirt(unittest.TestCase):
             address1 = 'strathfield',
             postcode = '2134',
             city = 'sydney',
-            phone = '362763721'
+            phone = '323232323'
         ), follow_redirects=True)
         assert b'update success' in rv.data
 
@@ -178,6 +178,11 @@ class Test_Tshirt(unittest.TestCase):
         self.client.post("/login", data={"username": "stn131415", "password": "Stn131415~"})
         rv = self.client.get('/get_spo/', follow_redirects=True)
         assert b'date' in rv.data
+
+    # def test_add(self):
+    #     self.client.post("/login", data={"username": "stn131415", "password": "Stn131415~"})
+    #     rv=self.client.emergency('temperature', 33)
+    #     print(rv)
 
 
 if __name__ == '__main__':
